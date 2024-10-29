@@ -167,6 +167,12 @@ namespace BasselTech
                     shiftFlag = false;
                 }
 
+                // Return all but the last character (end condition)
+                if (barcodeBuilder.Length > 0)
+                {
+                    barcodeBuilder.Length -= 1;
+                }
+
                 return barcodeBuilder.ToString();
             }
 
