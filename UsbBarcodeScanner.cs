@@ -64,6 +64,7 @@ namespace BasselTech
             private static IntPtr _hookId = IntPtr.Zero;
             private readonly List<Keys> _keys = new List<Keys>();
             private readonly Timer _timer = new Timer();
+            private readonly Keys _endKey;
 
             #endregion
 
@@ -75,8 +76,14 @@ namespace BasselTech
 
             #region Constructor
 
-            public UsbBarcodeScanner()
+            public UsbBarcodeScanner() : this(Keys.Enter)
             {
+
+            }
+
+            public UsbBarcodeScanner(Keys endKey)
+            {
+                _endKey = endKey;
                 _timer.Interval = 20;
                 _timer.Tick += (sender, args) => _keys.Clear();
                 _timer.Stop();
@@ -166,7 +173,7 @@ namespace BasselTech
                     var key = (Keys)vkCode;
 
                     _timer.Stop();
-                    if (key == Keys.Enter)
+                    if (key == _endKey)
                     {
                         if (_keys.Count > 0)
                         {
