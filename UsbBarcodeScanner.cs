@@ -35,9 +35,6 @@ namespace BasselTech
             private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
 
             [DllImport("user32.dll")]
-            private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
-
-            [DllImport("user32.dll")]
             private static extern IntPtr GetKeyboardLayout(uint idThread);
 
             [DllImport("user32.dll")]
@@ -49,6 +46,15 @@ namespace BasselTech
             [DllImport("user32.dll")]
             static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
 
+            [DllImport("setupapi.dll", SetLastError = true)]
+            private static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid, IntPtr Enumerator, IntPtr hwndParent, uint Flags);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            private static extern bool SetupDiEnumDeviceInfo(IntPtr DeviceInfoSet, uint MemberIndex, ref SP_DEVINFO_DATA DeviceInfoData);
+
+            [DllImport("setupapi.dll", SetLastError = true)]
+            private static extern bool SetupDiGetDeviceInstanceId(IntPtr DeviceInfoSet, ref SP_DEVINFO_DATA DeviceInfoData, StringBuilder DeviceInstanceId, int DeviceInstanceIdSize, out int RequiredSize);
+
             #endregion
 
             #region Delegates and Constants
@@ -56,15 +62,20 @@ namespace BasselTech
             private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
             private const int WH_KEYBOARD_LL = 13;
             private const int WM_KEYDOWN = 0x0100;
+            private const uint DIGCF_PRESENT = 0x00000002;
+            private const uint DIGCF_DEVICEINTERFACE = 0x00000010;
 
             #endregion
 
             #region Private Fields
 
-            private static IntPtr _hookId = IntPtr.Zero;
+            private IntPtr _hookId = IntPtr.Zero;
             private readonly List<Keys> _keys = new List<Keys>();
             private readonly Timer _timer = new Timer();
             private readonly Keys _endKey;
+            private readonly string _endKeyStr;
+            private readonly string _targetDeviceId;
+            private LowLevelKeyboardProc _keyboardProc;
 
             #endregion
 
@@ -76,24 +87,38 @@ namespace BasselTech
 
             #region Constructor
 
-            public UsbBarcodeScanner() : this(Keys.Enter)
+            public UsbBarcodeScanner() : this(Keys.Enter, string.Empty)
             {
-
             }
 
-            public UsbBarcodeScanner(Keys endKey)
+            public UsbBarcodeScanner(Keys endKey, string targetDeviceId)
             {
+                _targetDeviceId = targetDeviceId;
                 _endKey = endKey;
                 _timer.Interval = 20;
                 _timer.Tick += (sender, args) => _keys.Clear();
                 _timer.Stop();
+
+                _keyboardProc = KeyboardHookCallback;
             }
+
+            public UsbBarcodeScanner(string endKey, string targetDeviceId)
+            {
+                _targetDeviceId = targetDeviceId;
+                _endKeyStr = endKey;
+                _timer.Interval = 20;
+                _timer.Tick += (sender, args) => _keys.Clear();
+                _timer.Stop();
+
+                _keyboardProc = KeyboardHookCallback;
+            }
+
 
             public void Start()
             {
                 if (IsCapturing())
                     return;
-                _hookId = SetHook(KeyboardHookCallback);
+                _hookId = SetHook();
                 _timer.Start();
             }
 
@@ -116,12 +141,12 @@ namespace BasselTech
 
             #region Private Methods
 
-            private IntPtr SetHook(LowLevelKeyboardProc proc)
+            private IntPtr SetHook()
             {
                 using (var curProcess = System.Diagnostics.Process.GetCurrentProcess())
                 using (var curModule = curProcess.MainModule)
                 {
-                    return SetWindowsHookEx(WH_KEYBOARD_LL, proc, LoadLibrary("user32"), 0);
+                    return SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc, LoadLibrary("user32"), 0);
                 }
             }
 
@@ -172,24 +197,86 @@ namespace BasselTech
                     // Convert the virtual key code to a Keys enum value
                     var key = (Keys)vkCode;
 
-                    _timer.Stop();
-                    if (key == _endKey)
+                    // Check if the key event is from the target device
+                    if (IsKeyFromTargetDevice())
                     {
-                        if (_keys.Count > 0)
+                        _timer.Stop();
+
+                        if (EndKeyDetected(key))
                         {
-                            var barcode = GetBarcodeString();
-                            BarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(barcode));
+                            if (_keys.Count > 0)
+                            {
+                                var barcode = GetBarcodeString();
+                                BarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(barcode));
+                            }
+                            _keys.Clear();
                         }
-                        _keys.Clear();
-                    }
-                    else
-                    {
-                        _keys.Add(key);
-                        _timer.Start();
+                        else
+                        {
+                            _keys.Add(key);
+                            _timer.Start();
+                        }
                     }
                 }
 
                 return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
+            }
+
+            private bool EndKeyDetected(Keys key)
+            {
+                bool shiftFlag = false;
+                if (_keys.Count > 0)
+                {
+                    Keys previousKey = _keys[_keys.Count - 1];
+                    if (previousKey == Keys.ShiftKey || previousKey == Keys.LShiftKey || previousKey == Keys.RShiftKey)
+                    {
+                        shiftFlag = true;
+                    }
+                }
+
+                string keyStr = KeyCodeToUnicode(key, shiftFlag);
+
+                if (key == _endKey || (!string.IsNullOrEmpty(_endKeyStr) && string.Equals(keyStr, _endKeyStr)))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool IsKeyFromTargetDevice()
+            {
+                if (string.IsNullOrEmpty(_targetDeviceId))
+                {
+                    return true;
+                }
+
+                // HID Class GUID: This specific GUID is predefined by Microsoft to represent the HID device class
+                var hidGuid = new Guid("4D1E55B2-F16F-11CF-88CB-001111000030");
+                var deviceInfoSet = SetupDiGetClassDevs(ref hidGuid, IntPtr.Zero, IntPtr.Zero, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+
+                if (deviceInfoSet == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                var deviceInfoData = new SP_DEVINFO_DATA();
+                deviceInfoData.cbSize = Marshal.SizeOf(deviceInfoData);
+
+                for (uint i = 0; SetupDiEnumDeviceInfo(deviceInfoSet, i, ref deviceInfoData); i++)
+                {
+                    var deviceInstanceId = new StringBuilder(256);
+                    if (SetupDiGetDeviceInstanceId(deviceInfoSet, ref deviceInfoData, deviceInstanceId, deviceInstanceId.Capacity, out _))
+                    {
+                        var normalizedDeviceInstanceId = deviceInstanceId.ToString().Replace('\\', '#');
+                        if (normalizedDeviceInstanceId.Contains(_targetDeviceId))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
 
             #endregion
@@ -202,7 +289,19 @@ namespace BasselTech
             }
 
             #endregion
-        }
 
+            #region Structs
+
+            [StructLayout(LayoutKind.Sequential)]
+            private struct SP_DEVINFO_DATA
+            {
+                public int cbSize;
+                public Guid ClassGuid;
+                public uint DevInst;
+                public IntPtr Reserved;
+            }
+
+            #endregion
+        }
     }
 }
