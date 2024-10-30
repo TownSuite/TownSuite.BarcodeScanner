@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48;net6.0-windows;net8.0-windows</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <RootNamespace>BasselTech</RootNamespace>
+    <AssemblyName>USB-Barcode-Scanner</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+  </PropertyGroup>
+</Project>
