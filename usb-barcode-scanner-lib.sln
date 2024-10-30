@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "usb-barcode-scanner-lib", "usb-barcode-scanner-lib\usb-barcode-scanner-lib.csproj", "{EC90583A-A843-42AD-AD7B-E8096CA65871}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TownSuite.BarcodeScanner", "TownSuite.BarcodeScanner\TownSuite.BarcodeScanner.csproj", "{EC90583A-A843-42AD-AD7B-E8096CA65871}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "winform-example", "winform-example\winform-example.csproj", "{9781AE4F-19F2-45F9-89AF-8BCB3BF971C2}"
 EndProject

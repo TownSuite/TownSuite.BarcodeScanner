@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\usb-barcode-scanner-lib\usb-barcode-scanner-lib.csproj" />
+    <ProjectReference Include="..\TownSuite.BarcodeScanner\TownSuite.BarcodeScanner.csproj" />
   </ItemGroup>
 
 </Project>

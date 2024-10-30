@@ -1,3 +1,5 @@
+Fork of https://github.com/BasselTech/usb-barcode-scanner-lib.git
+
 # USB Barcode Scanner Library
 
 ## Description
@@ -12,7 +14,7 @@ To build the **USB Barcode Scanner Library** from source, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/BasselTech/usb-barcode-scanner-lib.git
+   git clone https://github.com/TownSuite/usb-barcode-scanner-lib.git
    ```
 
 2. Navigate to the project directory:
@@ -36,7 +38,7 @@ To build the **USB Barcode Scanner Library** from source, follow these steps:
 ## Installation & Usage
 To use the **USB Barcode Scanner Library** in your C# or VB .NET application, follow these steps:
 
-1. Download the latest release from the [Releases](https://github.com/BasselTech/usb-barcode-scanner-lib/releases) page.
+1. Download the latest release from the [Releases](https://github.com/TownSuite/usb-barcode-scanner-lib/releases) page.
 
 2. Extract the downloaded files into your project directory.
 
@@ -50,7 +52,7 @@ To use the **USB Barcode Scanner Library** in your C# or VB .NET application, fo
 
 Example usage in C#:
 ```csharp
-using BasselTech.UsbBarcodeScanner;
+using TownSuite.UsbBarcodeScanner;
 
 // Initialize USB barcode scanner
 var scanner = new UsbBarcodeScanner();
@@ -67,7 +69,7 @@ scanner.Start();
 
 Example usage in VB .NET:
 ```vb
-Imports BasselTech.UsbBarcodeScanner
+Imports TownSuite.UsbBarcodeScanner
 
 ' Initialize USB barcode scanner
 Dim scanner As New UsbBarcodeScanner()
@@ -94,4 +96,4 @@ We welcome contributions from the community! If you'd like to contribute to the 
 If you encounter any bugs or issues with the **USB Barcode Scanner Library**, please open an issue on the repository. Include a detailed description of the problem and any relevant information for reproducing it.
 
 ## License
-This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/BasselTech/usb-barcode-scanner-lib?tab=Apache-2.0-1-ov-file#readme) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/TownSuite/usb-barcode-scanner-lib?tab=Apache-2.0-1-ov-file#readme) file for details.
