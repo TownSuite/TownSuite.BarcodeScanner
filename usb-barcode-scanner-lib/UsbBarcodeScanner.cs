@@ -54,8 +54,6 @@ namespace BasselTech
             private const int WH_KEYBOARD_LL = 13;
             private const int WM_KEYDOWN = 0x0100;
             private const int WM_KEYUP = 0x0101;
-            private const uint DIGCF_PRESENT = 0x00000002;
-            private const uint DIGCF_DEVICEINTERFACE = 0x00000010;
 
             #endregion
 
@@ -66,7 +64,6 @@ namespace BasselTech
             private readonly Timer _timer = new Timer();
             private readonly Keys _endKey;
             private readonly string _endKeyStr;
-            private readonly string _targetDeviceId;
             private LowLevelKeyboardProc _keyboardProc;
 
             #endregion
@@ -79,13 +76,12 @@ namespace BasselTech
 
             #region Constructor
 
-            public UsbBarcodeScanner() : this(Keys.Enter, string.Empty)
+            public UsbBarcodeScanner() : this(Keys.Enter)
             {
             }
 
-            public UsbBarcodeScanner(Keys endKey, string targetDeviceId)
+            public UsbBarcodeScanner(Keys endKey)
             {
-                _targetDeviceId = targetDeviceId;
                 _endKey = endKey;
                 _timer.Interval = 20;
                 _timer.Tick += (sender, args) => _keys.Clear();
@@ -94,9 +90,8 @@ namespace BasselTech
                 _keyboardProc = KeyboardHookCallback;
             }
 
-            public UsbBarcodeScanner(string endKey, string targetDeviceId)
+            public UsbBarcodeScanner(string endKey)
             {
-                _targetDeviceId = targetDeviceId;
                 _endKeyStr = endKey;
                 _timer.Interval = 20;
                 _timer.Tick += (sender, args) => _keys.Clear();
@@ -204,17 +199,14 @@ namespace BasselTech
                     // Convert the virtual key code to a Keys enum value
                     var key = (Keys)vkCode;
 
-                    // Check if the key event is from the target device
-                    if (IsKeyFromTargetDevice())
+                    _timer.Stop();
+                    shouldRaiseEvent = EndKeyDetected(key);
+                    if (!shouldRaiseEvent)
                     {
-                        _timer.Stop();
-                        shouldRaiseEvent = EndKeyDetected(key);
-                        if (!shouldRaiseEvent)
-                        {
-                            _keys.Add(key);
-                            _timer.Start();
-                        }
+                        _keys.Add(key);
+                        _timer.Start();
                     }
+
                 }
                 else if (shouldRaiseEvent && nCode >= 0 && wParam == (IntPtr)WM_KEYUP)
                 {
@@ -247,41 +239,6 @@ namespace BasselTech
                 if (key == _endKey || (!string.IsNullOrEmpty(_endKeyStr) && string.Equals(keyStr, _endKeyStr)))
                 {
                     return true;
-                }
-
-                return false;
-            }
-
-            private bool IsKeyFromTargetDevice()
-            {
-                if (string.IsNullOrEmpty(_targetDeviceId))
-                {
-                    return true;
-                }
-
-                // HID Class GUID: This specific GUID is predefined by Microsoft to represent the HID device class
-                var hidGuid = new Guid("4D1E55B2-F16F-11CF-88CB-001111000030");
-                var deviceInfoSet = SetupDiGetClassDevs(ref hidGuid, IntPtr.Zero, IntPtr.Zero, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
-                if (deviceInfoSet == IntPtr.Zero)
-                {
-                    return false;
-                }
-
-                var deviceInfoData = new SP_DEVINFO_DATA();
-                deviceInfoData.cbSize = Marshal.SizeOf(deviceInfoData);
-
-                for (uint i = 0; SetupDiEnumDeviceInfo(deviceInfoSet, i, ref deviceInfoData); i++)
-                {
-                    var deviceInstanceId = new StringBuilder(256);
-                    if (SetupDiGetDeviceInstanceId(deviceInfoSet, ref deviceInfoData, deviceInstanceId, deviceInstanceId.Capacity, out _))
-                    {
-                        var normalizedDeviceInstanceId = deviceInstanceId.ToString().Replace('\\', '#');
-                        if (normalizedDeviceInstanceId.Contains(_targetDeviceId))
-                        {
-                            return true;
-                        }
-                    }
                 }
 
                 return false;
