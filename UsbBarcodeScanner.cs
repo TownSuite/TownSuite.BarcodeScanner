@@ -181,6 +181,8 @@ namespace BasselTech
                 var lpKeyState = new byte[255];
                 GetKeyboardState(lpKeyState);
 
+                // Explicitly set the Shift key state based on the shiftFlag parameter
+                // as the GetKeyboardState method does not return the correct state for the Shift key
                 if (shiftFlag)
                     lpKeyState[(int)Keys.ShiftKey] = 0x80;
 
