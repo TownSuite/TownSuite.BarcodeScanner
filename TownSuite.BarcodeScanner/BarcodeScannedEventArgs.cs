@@ -2,14 +2,13 @@
 
 namespace TownSuite.BarcodeScanner
 {
-        public class BarcodeScannedEventArgs : EventArgs
+    public class BarcodeScannedEventArgs : EventArgs
+    {
+        public BarcodeScannedEventArgs(string barcode)
         {
-            public BarcodeScannedEventArgs(string barcode)
-            {
-                Barcode = barcode;
-            }
-
-            public string Barcode { get; }
+            Barcode = barcode;
         }
+
+        public string Barcode { get; }
     }
 }
