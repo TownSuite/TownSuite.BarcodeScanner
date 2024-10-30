@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BasselTech.UsbBarcodeScanner
+namespace TownSuite.BarcodeScanner
 {
     public interface IUsbBarcodeScanner
     {

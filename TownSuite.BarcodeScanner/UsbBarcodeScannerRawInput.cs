@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Text;
 
-namespace BasselTech
-{
-    namespace UsbBarcodeScanner
-    {
+namespace TownSuite.BarcodeScanner 
+{ 
 
         public class UsbBarcodeScannerRawInput : NativeWindow, IUsbBarcodeScanner
         {

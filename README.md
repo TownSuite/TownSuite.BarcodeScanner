@@ -3,7 +3,7 @@ Fork of https://github.com/BasselTech/usb-barcode-scanner-lib.git
 # USB Barcode Scanner Library
 
 ## Description
-The **USB Barcode Scanner Library** is a .NET framework library developed by **BasselTech** in C#. It allows capturing the barcodes scanned by USB barcode scanners in both C# and VB .NET applications.
+The **USB Barcode Scanner Library** is a .NET framework library originally developed by **BasselTech** and this fork by TownSuite in C#. It allows capturing the barcodes scanned by USB barcode scanners in both C# and VB .NET applications.
 
 ## Features
 - Capture barcodes scanned by USB barcode scanners, even when the application window is out of focus.
@@ -50,9 +50,12 @@ To use the **USB Barcode Scanner Library** in your C# or VB .NET application, fo
 
 6. Start capturing barcode scans.
 
-Example usage in C#:
+### UsbBarcodeScanner
+
+#### Example usage in C#:
+
 ```csharp
-using TownSuite.UsbBarcodeScanner;
+using TownSuite.BarcodeScanner;
 
 // Initialize USB barcode scanner
 var scanner = new UsbBarcodeScanner();
@@ -67,12 +70,51 @@ scanner.BarcodeScanned += (sender, args) =>
 scanner.Start();
 ```
 
-Example usage in VB .NET:
+#### Example usage in VB .NET:
+
 ```vb
-Imports TownSuite.UsbBarcodeScanner
+Imports TownSuite.BarcodeScanner
 
 ' Initialize USB barcode scanner
 Dim scanner As New UsbBarcodeScanner()
+
+' Subscribe to BarcodeScanned event
+AddHandler scanner.BarcodeScanned, Sub(sender, args)
+                                       Console.WriteLine($"Scanned barcode: {args.Barcode}")
+                                   End Sub
+
+' Start capturing barcode scans
+scanner.Start()
+```
+
+### UsbBarcodeScannerRawInput
+
+Use the UsbBarcodeScannerRawInput scanner when input from a particular device and only that device is desired.
+
+#### Example usage in C#:
+```csharp
+using TownSuite.BarcodeScanner;
+
+// Initialize USB barcode scanner
+var scanner = new UsbBarcodeScannerRawInput(formInstance, "#", "HID#VID_05E0&PID_1200");
+
+// Subscribe to BarcodeScanned event
+scanner.BarcodeScanned += (sender, args) =>
+{
+    Console.WriteLine($"Scanned barcode: {args.Barcode}");
+};
+
+// Start capturing barcode scans
+scanner.Start();
+```
+
+####Example usage in VB .NET:
+
+```vb
+Imports TownSuite.BarcodeScanner
+
+' Initialize USB barcode scanner
+Dim scanner As New UsbBarcodeScannerRawInput(formInstance, "#", "HID#VID_05E0&PID_1200");
 
 ' Subscribe to BarcodeScanned event
 AddHandler scanner.BarcodeScanned, Sub(sender, args)

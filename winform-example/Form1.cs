@@ -1,4 +1,4 @@
-using BasselTech.UsbBarcodeScanner;
+using TownSuite.BarcodeScanner;
 
 namespace winform_example
 {

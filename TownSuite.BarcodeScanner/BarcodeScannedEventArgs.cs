@@ -1,9 +1,7 @@
 ﻿using System;
 
-namespace BasselTech
+namespace TownSuite.BarcodeScanner
 {
-    namespace UsbBarcodeScanner
-    {
         public class BarcodeScannedEventArgs : EventArgs
         {
             public BarcodeScannedEventArgs(string barcode)
