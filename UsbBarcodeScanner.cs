@@ -62,6 +62,7 @@ namespace BasselTech
             private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
             private const int WH_KEYBOARD_LL = 13;
             private const int WM_KEYDOWN = 0x0100;
+            private const int WM_KEYUP = 0x0101;
             private const uint DIGCF_PRESENT = 0x00000002;
             private const uint DIGCF_DEVICEINTERFACE = 0x00000010;
 
@@ -184,7 +185,13 @@ namespace BasselTech
                 // Explicitly set the Shift key state based on the shiftFlag parameter
                 // as the GetKeyboardState method does not return the correct state for the Shift key
                 if (shiftFlag)
+                {
                     lpKeyState[(int)Keys.ShiftKey] = 0x80;
+                }
+                else
+                {
+                    lpKeyState[(int)Keys.ShiftKey] = 0x0;
+                }
 
                 var wVirtKey = (uint)key;
                 var wScanCode = MapVirtualKey(wVirtKey, 0);
@@ -195,6 +202,7 @@ namespace BasselTech
                 return pwszBuff.ToString();
             }
 
+            private bool shouldRaiseEvent = false;
             private IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
             {
                 if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
@@ -209,22 +217,23 @@ namespace BasselTech
                     if (IsKeyFromTargetDevice())
                     {
                         _timer.Stop();
-
-                        if (EndKeyDetected(key))
-                        {
-                            if (_keys.Count > 0)
-                            {
-                                var barcode = GetBarcodeString();
-                                BarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(barcode));
-                            }
-                            _keys.Clear();
-                        }
-                        else
+                        shouldRaiseEvent = EndKeyDetected(key);
+                        if (!shouldRaiseEvent)
                         {
                             _keys.Add(key);
                             _timer.Start();
                         }
                     }
+                }
+                else if (shouldRaiseEvent && nCode >= 0 && wParam == (IntPtr)WM_KEYUP)
+                {
+                    shouldRaiseEvent = false;
+                    if (_keys.Count > 0)
+                    {
+                        var barcode = GetBarcodeString();
+                        BarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(barcode));
+                    }
+                    _keys.Clear();
                 }
 
                 return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
