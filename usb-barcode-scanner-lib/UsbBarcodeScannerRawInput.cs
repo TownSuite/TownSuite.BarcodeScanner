@@ -9,7 +9,7 @@ namespace BasselTech
     namespace UsbBarcodeScanner
     {
 
-        public class UsbBarcodeScannerRawInput : NativeWindow
+        public class UsbBarcodeScannerRawInput : NativeWindow, IUsbBarcodeScanner
         {
             #region WinAPI Declarations
 

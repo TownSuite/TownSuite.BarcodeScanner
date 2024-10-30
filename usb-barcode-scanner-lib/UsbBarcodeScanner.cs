@@ -8,17 +8,8 @@ namespace BasselTech
 {
     namespace UsbBarcodeScanner
     {
-        public class BarcodeScannedEventArgs : EventArgs
-        {
-            public BarcodeScannedEventArgs(string barcode)
-            {
-                Barcode = barcode;
-            }
 
-            public string Barcode { get; }
-        }
-
-        public class UsbBarcodeScanner
+        public class UsbBarcodeScanner : IUsbBarcodeScanner
         {
             #region WinAPI Declarations
 
