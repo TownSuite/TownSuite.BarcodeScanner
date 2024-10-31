@@ -292,7 +292,7 @@ namespace TownSuite.BarcodeScanner
 
             string keyStr = KeyCodeToUnicode(key, shiftFlag);
 
-            if (key == _endKey || (!string.IsNullOrEmpty(_endKeyStr) && string.Equals(keyStr, _endKeyStr)))
+            if (key == _endKey || key == Keys.Enter || (!string.IsNullOrEmpty(_endKeyStr) && string.Equals(keyStr, _endKeyStr)))
             {
                 return true;
             }
