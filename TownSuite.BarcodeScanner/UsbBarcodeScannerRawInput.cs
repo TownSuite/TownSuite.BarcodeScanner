@@ -261,24 +261,26 @@ namespace TownSuite.BarcodeScanner
         }
 
 
+        bool shouldRaiseEvent = false;
         private void ProcessKeyEvent(ushort virtualKey, bool isKeyDown)
         {
-            // Convert the virtual key code to a Keys enum value
-            var key = (Keys)virtualKey;
-
-            _timer.Stop();
-            bool shouldRaiseEvent = EndKeyDetected(key);
-            if (isKeyDown)
-            {
-                _keys.Add(key);
-                _timer.Start();
-            }
-
             if (shouldRaiseEvent)
             {
                 string barcode = GetBarcodeString();
                 BarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(barcode));
                 _keys.Clear();
+                shouldRaiseEvent = false;
+            }
+
+            // Convert the virtual key code to a Keys enum value
+            var key = (Keys)virtualKey;
+
+            _timer.Stop();
+            shouldRaiseEvent = EndKeyDetected(key);
+            if (isKeyDown)
+            {
+                _keys.Add(key);
+                _timer.Start();
             }
         }
 

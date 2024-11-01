@@ -20,6 +20,7 @@ namespace winform_example
             scannerListener.BarcodeScanned += (s, args) =>
             {
                 listBox1.Items.Add(args.Barcode);
+                textBox1.Focus();
             };
 
             scannerListener.Start();
