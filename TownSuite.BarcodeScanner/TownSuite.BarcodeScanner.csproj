@@ -7,9 +7,9 @@
 		<Deterministic>true</Deterministic>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.0.1</Version>
-		<AssemblyVersion>1.0.1</AssemblyVersion>
-		<FileVersion>1.0.1</FileVersion>
+		<Version>1.0.2</Version>
+		<AssemblyVersion>1.0.2</AssemblyVersion>
+		<FileVersion>1.0.2</FileVersion>
 		<Company>TownSuite Municipal Software Inc.</Company>
 		<Product>TownSuite Financial</Product>
 		<Copyright>Copyright © TownSuite Municipal Software Inc. 2024.  Copyright © BasselTech 2024</Copyright>
