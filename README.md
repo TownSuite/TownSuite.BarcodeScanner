@@ -14,7 +14,7 @@ To build the **USB Barcode Scanner Library** from source, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/TownSuite/usb-barcode-scanner-lib.git
+   git clone https://github.com/TownSuite/TownSuite.BarcodeScanner.git
    ```
 
 2. Navigate to the project directory:
@@ -35,20 +35,7 @@ To build the **USB Barcode Scanner Library** from source, follow these steps:
 4. Once built successfully, the library files will be available in the `bin` directory.
 
 
-## Installation & Usage
-To use the **USB Barcode Scanner Library** in your C# or VB .NET application, follow these steps:
-
-1. Download the latest release from the [Releases](https://github.com/TownSuite/usb-barcode-scanner-lib/releases) page.
-
-2. Extract the downloaded files into your project directory.
-
-3. Add a reference to the library file `USB-Barcode-Scanner.dll` in your C# or VB .NET project.
-
-4. Initialize a USB barcode scanner object.
-
-5. Subscribe to the `BarcodeScanned` event to handle scanned barcode data.
-
-6. Start capturing barcode scans.
+## Usage
 
 ### UsbBarcodeScanner
 
