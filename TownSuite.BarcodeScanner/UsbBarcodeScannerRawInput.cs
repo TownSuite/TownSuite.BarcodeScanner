@@ -69,7 +69,7 @@ namespace TownSuite.BarcodeScanner
         private readonly Timer _timer = new Timer();
         private readonly Keys _endKey;
         private readonly string _endKeyStr;
-        private readonly string _targetDeviceId;
+        private readonly string[] _targetDeviceIds;
         private bool _isCapturing = false;
         private readonly IntPtr hwd;
 
@@ -83,14 +83,14 @@ namespace TownSuite.BarcodeScanner
 
         #region Constructor
 
-        public UsbBarcodeScannerRawInput(Form frm) : this(frm, Keys.Enter, string.Empty)
+        public UsbBarcodeScannerRawInput(Form frm) : this(frm, Keys.Enter, null)
         {
         }
 
-        public UsbBarcodeScannerRawInput(Form frm, Keys endKey, string targetDeviceId)
+        public UsbBarcodeScannerRawInput(Form frm, Keys endKey, string[] targetDeviceIds)
         {
             hwd = frm.Handle;
-            _targetDeviceId = targetDeviceId;
+            _targetDeviceIds = targetDeviceIds;
             _endKey = endKey;
             _timer.Interval = 20;
             _timer.Tick += (sender, args) => _keys.Clear();
@@ -98,10 +98,14 @@ namespace TownSuite.BarcodeScanner
             AssignHandle(hwd);
         }
 
-        public UsbBarcodeScannerRawInput(Form frm, string endKey, string targetDeviceId)
+        public UsbBarcodeScannerRawInput(Form frm, string endKey, string targetDeviceIds) : this(frm, endKey, new string[] { targetDeviceIds })
+        {
+        }
+
+        public UsbBarcodeScannerRawInput(Form frm, string endKey, string[] targetDeviceIds)
         {
             hwd = frm.Handle;
-            _targetDeviceId = targetDeviceId;
+            _targetDeviceIds = targetDeviceIds;
             _endKeyStr = endKey;
             _timer.Interval = 20;
             _timer.Tick += (sender, args) => _keys.Clear();
@@ -328,11 +332,13 @@ namespace TownSuite.BarcodeScanner
                 string normalizedDeviceName = deviceName.Replace("\\", "#");
 
                 // Compare the device name with the target device ID
-                if (normalizedDeviceName.Contains(_targetDeviceId))
+                foreach (var deviceId in _targetDeviceIds)
                 {
-                    return true;
+                    if (normalizedDeviceName.Contains(deviceId))
+                    {
+                        return true;
+                    }
                 }
-
             }
             finally
             {
